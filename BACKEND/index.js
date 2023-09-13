@@ -1,18 +1,19 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import multer from 'multer';
+import express from 'express';   // framework
+import bodyParser from 'body-parser';   // to parse the request body
+import mongoose from 'mongoose';    // access mongodb
+import cors from 'cors';          // cross origin requests
+import dotenv from 'dotenv';     //environment variables for safety
+import multer from 'multer';     // for upload files
 import helmet from 'helmet';
-import morgan from 'morgan';
+import morgan from 'morgan';    
 
 //these 2 we don;t need to install, they are already in node
 // helps in setting path for the images we will upload.
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Console, log } from 'console';
 
+import authRoutes from "./routes/auth.js";
+import { register } from './controllers/auth.js';
 
 /* CONFIGURATION */
 
@@ -52,6 +53,21 @@ const storage =  multer.diskStorage({
 //whenever we need to upload file, we will use upload variable
 const upload = multer({storage});
 
+
+
+/* ROUTES WITH FILES */
+
+// what this will do is, we will hit the route from frontend and upload middleware
+// will upload the single picture locally using storage in public/assets folder.
+// register is actual logic which is a function we will keep it in separate folder(controller)
+// we didn't have a separate route for this cause we need to use that upload variable.
+app.post('/auth/register', upload.single("picture"), register);
+
+
+/* ROUTES */
+//these are the routes which don't involve uploading file
+// this will attach /auth to the routes from authRoutes
+app.use("/auth", authRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;    //6001 as backup
